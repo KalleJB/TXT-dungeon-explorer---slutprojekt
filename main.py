@@ -3,6 +3,9 @@ import sys
 import os
 import random
 
+# globals
+
+
 # classes
 
 class Player:
@@ -46,6 +49,18 @@ class Player:
 
     def print_test(self):
         print(self.stunChance)
+    
+    def modify_boon(self, boon):
+        # boon är en gåva
+        # den adderar/subtraherar nånting till/från ett visst atr
+        # vi behöver lista ut vilken effekten är och sen välja
+        # rätt attribut
+        
+        # boon.effect # ger oss vilken variabel som ska ändras
+        setattr(self, boon.effect, getattr(self, boon.effect) + boon.value)
+        # setattr(object, variablenamn, value)
+
+
 
 
 
@@ -128,6 +143,14 @@ class Armour(Item):
     def wear():
         pass
 
+class Boon:
+    def __init__(self, name, effect, value) -> None:
+        self.name = name # nått ballt namn på boonet, typ Shalyas Favor som ger mer health
+        self.effect = effect # sträng som innehåller variabelnamnet, t ex "self.health"
+        self.value = value # talet som ska ändra nånting hos player
+
+    def __str__(self) -> str:
+        return f"{self.name}"
 
 # functions
 
@@ -194,31 +217,49 @@ def enterRoom():
     else:
         pass 
 
-def choose_boon(player):
+
+def choose_boon(player : Player):
+    boons = [Boon("Shalyas gift", "health", 3), 
+                Boon("Grungi's Might", "power", 3), 
+                Boon("Valayas decadence", "stunChance", 5)]
+
+    print(player.stunChance)
+
     print("Closing your eyes, your vision suddenly becomes more vivid.")
-    print("Imagine a gift.")
+    print("You imagine a few gifts.")
+    for i, boon in enumerate(boons):
+        print(i, boon)
+    print("Pick a boon with their index.")
+    boon_choice = input(">> ")
+    player.modify_boon(boon)
 
-    boon_name_list = ["+1 stunChance", "+1 parryChance"]
-    #boon_list = [player.add_stunChance(2)]
+    print(player.stunChance)
+    
+    # boon_name_list = ["+1 stunChance", "+1 parryChance"]
+    # #boon_list = [player.add_stunChance(2)]
 
-    print(player.print_test())
-    print(f"[x] {boon_name_list[0]}")
-    #print(f"[y] {}")
-    #print(f"[z] {}")
+    # print(player.print_test())
+    # print(f"[x] {boon_name_list[0]}")
+    # #print(f"[y] {}")
+    # #print(f"[z] {}")
 
-    acceptable_choices = ["x", "y", "z"]
-    choice = input("> ")
-    while choice.lower() not in acceptable_choices:
-        print("Unknown action, do something else.\n")
-        choice = input("> ")
+    # acceptable_choices = ["x", "y", "z"]
+    # choice = input("> ")
+    # while choice.lower() not in acceptable_choices:
+    #     print("Unknown action, do something else.\n")
+    #     choice = input("> ")
 
-    if choice == "x":
-        player.stunChance += 1
+    # if choice == "x":
+    #     player.stunChance += 1
 
-    print(f"As you imagine the gift in your head, you feel power surging trough you.")
-    print(f"{boon_name_list[0]} gained.")
-    print(player.print_test())
-    #print(x power gained, x def gained, x def lost etc)
+    # print(f"As you imagine the gift in your head, you feel power surging through you.")
+    # print(f"{boon_name_list[0]} gained.")
+    # print(player.print_test())
+    # #print(x power gained, x def gained, x def lost etc)
+
+    # nille
+
+
     
 
 def fight():
