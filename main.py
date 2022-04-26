@@ -1,28 +1,27 @@
 # imports
+
 import sys
 import os
 import random
-
-# globals
 
 
 # classes
 
 class Player:
-    def __init__(self, name, power, hitChance, parryChance, tauntChance, health, defence) -> None:
+    def __init__(self, name, power, hit_chance, parry_chance, taunt_chance, health, defence) -> None:
         self.name = name
         self.points = 0
         self.power = power
-        self.hitChance = hitChance
-        self.parryChance = parryChance
-        self.tauntChance = tauntChance
+        self.hit_chance = hit_chance
+        self.parry_chance = parry_chance
+        self.taunt_chance = taunt_chance
         
         self.stun = False
-        self.stunChance = 0
+        self.stun_chance = 0
         self.bleed = False
-        self.bleedCounter = 0
+        self.bleed_counter = 0
 
-        self.maxHealth = health
+        self.max_health = health
         self.health = health
         self.defence = defence
 
@@ -35,20 +34,14 @@ class Player:
     def defend(self, target):
         pass
 
-    def add_stunChance(self, change):
-        self.stunChance += change
-    
-    def bleedCounter_up(self):
-        self.bleedCounter += 1
-        if self.bleedCounter == 3:
+    def bleed_counter_up(self):
+        self.bleed_counter += 1
+        if self.bleed_counter == 3:
             self.bleed = False
-            self.bleedCounter = 0
+            self.bleed_counter = 0
 
     def remove_bleed(self):
         self.bleed = False
-
-    def print_test(self):
-        print(self.stunChance)
     
     def modify_boon(self, boon):
         # boon är en gåva
@@ -70,7 +63,7 @@ class Enemy:
         self.pointGain = pointGain
         self.power = power
         self.critChance = critChance
-        self.maxHealth = health
+        self.max_health = health
         self.health = health
         self.defence = defence
         self.id = id 
@@ -103,12 +96,12 @@ class Room:
         pass
 
 class Weapon(Item):
-    def __init__(self, name, id, stackable, damage, critChance, special, stunChance, bleedChance) -> None:
+    def __init__(self, name, id, stackable, damage, critChance, special, stun_chance, bleedChance) -> None:
         super().__init__(name, id, stackable)
         self.damage = damage
         self.critChance = critChance
         self.special = special
-        self.stunChance = stunChance 
+        self.stun_chance = stun_chance 
         self.bleedChance = bleedChance
 
     def attack(target):
@@ -148,10 +141,10 @@ class Boon:
         self.name = name # nått ballt namn på boonet, typ Shalyas Favor som ger mer health
         self.effect = effect # sträng som innehåller variabelnamnet, t ex "self.health"
         self.value = value # talet som ska ändra nånting hos player
-
+        #self.flavour_text
     def __str__(self) -> str:
         return f"{self.name}"
-
+        #flavour_text
 # functions
 
 
@@ -188,79 +181,52 @@ def first_room(player):
     if door.lower() == "x":
         os.system("cls")
     
-
-
 def points():
     pass
-
-def enterRoom():
-    print("\n" + '='*35)
-    print("What would you like to do?")
-    print("[x] Fight ")
-    print("[y] Flee ")
-    print("[z] Interact ")
-    
-    acceptable_actions = ["x", "y", "z"]
-    action = input("> ")
-    while action not in acceptable_actions:
-        print("Unknown action, do something else.\n")
-        action = input("> ")
-        #os.system('cls')
-
-    os.system('cls')
-    if action.lower() == "x":
-        fight()
-    elif action.lower() == "y":
-        flee()
-    elif action.lower() == "z":
-        interact()
-    else:
-        pass 
-
 
 def choose_boon(player : Player):
     boons = [Boon("Shalyas gift", "health", 3), 
                 Boon("Grungi's Might", "power", 3), 
-                Boon("Valayas decadence", "stunChance", 5)]
+                Boon("Valayas decadence", "stun_chance", 5),
+                Boon("Ymirs blessing", "power", 7),
+                Boon("Draculas might", "health", -2)]
 
-    print(player.stunChance)
+    avaliable_boons = []
+    for i in range(3):
+        avaliable_boons.append(boons[random.randint(0, len(boons) - 1)])
 
     print("Closing your eyes, your vision suddenly becomes more vivid.")
-    print("You imagine a few gifts.")
-    for i, boon in enumerate(boons):
-        print(i, boon)
-    print("Pick a boon with their index.")
-    boon_choice = input(">> ")
-    player.modify_boon(boon)
-
-    print(player.stunChance)
+    print("You imagine a some gifts.")
+    i = 1
+    print("______________________ \n")
+    for i, boon in enumerate(avaliable_boons):
+        print(f'[{i}]  {boon}')
     
-    # boon_name_list = ["+1 stunChance", "+1 parryChance"]
-    # #boon_list = [player.add_stunChance(2)]
+    print("______________________")
+    print("Manifest a boon with their index.")
 
-    # print(player.print_test())
-    # print(f"[x] {boon_name_list[0]}")
-    # #print(f"[y] {}")
-    # #print(f"[z] {}")
-
-    # acceptable_choices = ["x", "y", "z"]
-    # choice = input("> ")
-    # while choice.lower() not in acceptable_choices:
-    #     print("Unknown action, do something else.\n")
-    #     choice = input("> ")
-
-    # if choice == "x":
-    #     player.stunChance += 1
-
-    # print(f"As you imagine the gift in your head, you feel power surging through you.")
-    # print(f"{boon_name_list[0]} gained.")
-    # print(player.print_test())
-    # #print(x power gained, x def gained, x def lost etc)
-
-    # nille
-
-
+    while True:
+        boon_choice = int(input("> "))
+        if 0 <= boon_choice <= 2:
+            picked_boon = avaliable_boons[boon_choice]
+            player.modify_boon(picked_boon)
+            print("\n")
+            break
+        else:
+            print("You get a stroke.")
     
+    
+    if picked_boon.value > 0:
+        print(f"As you imagine the gift in your head, you feel power surging through you.")
+        print(f"{picked_boon.value} {picked_boon.effect} gained.")
+    else:
+        print("As you imagine the gift in your head, you feel an aching pain in your soul.")
+        print(f"{picked_boon.value} {picked_boon.effect} lost.")
+    
+    print("\n\n [x]  Continue")
+    input("> ")
+    return
+
 
 def fight():
     pass
@@ -280,14 +246,18 @@ def main():
     player_defence = 1
     hit_chance = 60
     parry_chance = 50
-    tauntChance = 50
-    player = Player(choose_name(), player_power, hit_chance, parry_chance, tauntChance, player_health, player_defence)
+    taunt_chance = 50
+    player = Player(choose_name(), player_power, hit_chance, parry_chance, taunt_chance, player_health, player_defence)
 
     first_room(player)
 
-    
-    while True:
-        enterRoom()
+    # Main game LOOP
+    # Skapa fiende
+        # Player turn
+        # Enemy turn
+    # Choose boon
+
+
 
 
 if __name__ == "__main__":
