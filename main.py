@@ -1,5 +1,6 @@
 # imports
 
+from email.base64mime import header_length
 import sys
 import os
 import random
@@ -57,23 +58,6 @@ class Player:
 
 
 
-class Enemy:
-    def __init__(self, name, pointGain, power, critChance, health, defence, id ) -> None:
-        self.name = name
-        self.pointGain = pointGain
-        self.power = power
-        self.critChance = critChance
-        self.max_health = health
-        self.health = health
-        self.defence = defence
-        self.id = id 
-
-    def attack(target):
-        pass
-
-    def defend(target):
-        pass
-
 class Item:
     def __init__(self, name, id, stackable) -> None:
         self.name = name
@@ -96,10 +80,10 @@ class Room:
         pass
 
 class Weapon(Item):
-    def __init__(self, name, id, stackable, damage, critChance, special, stun_chance, bleedChance) -> None:
+    def __init__(self, name, id, stackable, damage, crit_chance, special, stun_chance, bleedChance) -> None:
         super().__init__(name, id, stackable)
         self.damage = damage
-        self.critChance = critChance
+        self.crit_chance = crit_chance
         self.special = special
         self.stun_chance = stun_chance 
         self.bleedChance = bleedChance
@@ -111,8 +95,8 @@ class Weapon(Item):
         opponent.bleed = True
 
 class Sheild(Weapon):
-    def __init__(self, name, id, stackable, damage, critChance, special, size, defence) -> None:
-        super().__init__(name, id, stackable, damage, critChance, special)
+    def __init__(self, name, id, stackable, damage, crit_chance, special, size, defence) -> None:
+        super().__init__(name, id, stackable, damage, crit_chance, special)
         self.size = size
         self.defence = defence
 
@@ -145,6 +129,24 @@ class Boon:
     def __str__(self) -> str:
         return f"{self.name}"
         #flavour_text
+
+class Enemy:
+    def __init__(self, name, point_gain, power, crit_chance, health, defence, id ) -> None:
+        self.name = name
+        self.point_gain = point_gain
+        self.power = power
+        self.crit_chance = crit_chance
+        self.max_health = health
+        self.health = health
+        self.defence = defence
+        self.id = id 
+
+    def attack(target):
+        pass
+
+    def defend(target):
+        pass
+
 # functions
 
 
@@ -181,6 +183,60 @@ def first_room(player):
     if door.lower() == "x":
         os.system("cls")
     
+###########################    
+def spawn_common(lvl, name):
+    point_gain = 10 * lvl
+    power = 1 + lvl
+    crit_chance = 1
+    max_health = 6 + lvl
+    health = max_health
+    defence = 0
+    id = ""
+
+    Enemy(name, point_gain, power, crit_chance, health, defence, id)
+
+def spawn_unusual(lvl, name):
+    point_gain = 30 * lvl
+    power = 3 + lvl
+    crit_chance = 1
+    max_health = 6 + lvl * 2
+    health = max_health
+    defence = 2
+    id = ""
+
+    Enemy(name, point_gain, power, crit_chance, health, defence, id)
+
+def spawn_legend(lvl, name):
+    point_gain = 100 * lvl
+    power = 7 + lvl * 2
+    crit_chance = 10
+    max_health = 15 + lvl * 3
+    health = max_health
+    defence = lvl 
+    id = ""
+
+    Enemy(name, point_gain, power, crit_chance, health, defence, id)
+
+def spawn_enemy(lvl):
+
+    # Insert API name generator here
+    # Monster scales with lvl
+    name = "Gustavo"
+
+    # Determines type
+    dice_roll = random.randint(0, 100)
+    # 20% chance
+    if 0 <= dice_roll < 20:
+        spawn_unusual()
+    # 75% chance
+    elif 20 <= dice_roll <= 95:
+        spawn_common()
+    # 5% chance
+    elif 95 < dice_roll <= 100:
+        spawn_legend()
+###########################
+
+
 def points():
     pass
 
@@ -227,11 +283,17 @@ def choose_boon(player : Player):
     input("> ")
     return
 
+###########################
+def player_turn():
+    pass
+
+def enemy_turn():
+    pass
 
 def fight():
     pass
 
-
+###########################
 
 # main
 def main():
@@ -253,10 +315,16 @@ def main():
 
     # Main game LOOP
     # Skapa fiende
+    # Fight-loop:
         # Player turn
         # Enemy turn
     # Choose boon
-
+    # LVL UP +1
+    while True:
+        spawn_enemy()
+        fight()
+        choose_boon()
+        lvl += 1
 
 
 
