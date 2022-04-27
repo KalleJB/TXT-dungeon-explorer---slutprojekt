@@ -1,6 +1,5 @@
 # imports
 
-from email.base64mime import header_length
 import sys
 import os
 import random
@@ -53,10 +52,6 @@ class Player:
         # boon.effect # ger oss vilken variabel som ska ändras
         setattr(self, boon.effect, getattr(self, boon.effect) + boon.value)
         # setattr(object, variablenamn, value)
-
-
-
-
 
 class Item:
     def __init__(self, name, id, stackable) -> None:
@@ -131,14 +126,16 @@ class Boon:
         #flavour_text
 
 class Enemy:
-    def __init__(self, name, point_gain, power, crit_chance, health, defence, id ) -> None:
+    def __init__(self, name, point_gain, power, hit_chance, crit_chance, health, defence, variant, id ) -> None:
         self.name = name
         self.point_gain = point_gain
         self.power = power
+        self.hit_chance = hit_chance
         self.crit_chance = crit_chance
         self.max_health = health
         self.health = health
         self.defence = defence
+        self.variant = variant
         self.id = id 
 
     def attack(target):
@@ -177,7 +174,9 @@ def first_room(player):
     print("Regaining some of your vision lets you see the walls of the room containing you. \nThey're made of damp cobblestone rock you've never seen before. \nFinding our why you are here is starting to get urgent.")
     print("\nYou find a small wooden door on one of the walls.")
     print("Before you have time take your first step, a voice in your head tells you to imagine a gift.")
+
     choose_boon(player)
+    os.system("cls")
     print("[x] Open door")
     door = input("> ")
     if door.lower() == "x":
@@ -187,35 +186,41 @@ def first_room(player):
 def spawn_common(lvl, name):
     point_gain = 10 * lvl
     power = 1 + lvl
+    hit_chance = 40
     crit_chance = 1
     max_health = 6 + lvl
     health = max_health
     defence = 0
-    id = ""
+    variant = "common"
+    id = lvl
 
-    Enemy(name, point_gain, power, crit_chance, health, defence, id)
-
-def spawn_unusual(lvl, name):
+    return Enemy(name, point_gain, power, hit_chance, crit_chance, health, defence, variant, id)
+    
+def spawn_strange(lvl, name):
     point_gain = 30 * lvl
     power = 3 + lvl
+    hit_chance = 60
     crit_chance = 1
     max_health = 6 + lvl * 2
     health = max_health
     defence = 2
-    id = ""
+    variant = "strange"
+    id = lvl
 
-    Enemy(name, point_gain, power, crit_chance, health, defence, id)
+    return Enemy(name, point_gain, power, hit_chance, crit_chance, health, defence, variant, id)
 
-def spawn_legend(lvl, name):
+def spawn_legendary(lvl, name):
     point_gain = 100 * lvl
     power = 7 + lvl * 2
+    hit_chance = 70
     crit_chance = 10
     max_health = 15 + lvl * 3
     health = max_health
     defence = lvl 
-    id = ""
+    variant = "legendary"
+    id = lvl
 
-    Enemy(name, point_gain, power, crit_chance, health, defence, id)
+    return Enemy(name, point_gain, power, hit_chance, crit_chance, health, defence, variant, id)
 
 def spawn_enemy(lvl):
 
@@ -227,15 +232,14 @@ def spawn_enemy(lvl):
     dice_roll = random.randint(0, 100)
     # 20% chance
     if 0 <= dice_roll < 20:
-        spawn_unusual()
+        return spawn_strange(lvl, name)
     # 75% chance
     elif 20 <= dice_roll <= 95:
-        spawn_common()
+        return spawn_common(lvl, name)
     # 5% chance
     elif 95 < dice_roll <= 100:
-        spawn_legend()
+        return spawn_legendary(lvl, name)
 ###########################
-
 
 def points():
     pass
@@ -271,7 +275,7 @@ def choose_boon(player : Player):
         else:
             print("You get a stroke.")
     
-    
+    os.system('cls')
     if picked_boon.value > 0:
         print(f"As you imagine the gift in your head, you feel power surging through you.")
         print(f"{picked_boon.value} {picked_boon.effect} gained.")
@@ -279,21 +283,77 @@ def choose_boon(player : Player):
         print("As you imagine the gift in your head, you feel an aching pain in your soul.")
         print(f"{picked_boon.value} {picked_boon.effect} lost.")
     
-    print("\n\n [x]  Continue")
+    print("\n\n[x]  Continue")
     input("> ")
     return
 
 ###########################
-def player_turn():
+def show_stats(enemy):
+
+    # print enemy and player stats  
+    os.system("cls")
+    print("___________________ \n")
+    print("[x] See MY stats")
+    print("[y] See ENEMY stats")
+    print("[z] Go back")
+    print("___________________")
+    aceptable_answers = ["x", "y", "z"]
+    answer = input("> ")
+
+
+    if answer in aceptable_answers:
+        if answer.lower() == "x":
+            pass
+        elif answer.lower() == "y":
+            pass
+        elif answer.lower() == "z":
+            return  
+
+def player_attack(enemy):
+    print(enemy.health)
+    input("")
+
+def player_defend(enemy):
     pass
+
+def player_turn(enemy):
+    while True:
+        os.system("cls")
+        print(f"You're up against {enemy.name}, a {enemy.variant} enemy.")
+        print("Whats your next move?")
+        print("_____________ \n")
+        print("[x] Attack")
+        print("[y] Defend")
+        print("[z] See stats")
+        print("_____________")
+        aceptable_answers = ["x", "y", "z"]
+        answer = input("> ")
+
+
+        if answer in aceptable_answers:
+            if answer.lower() == "x":
+                player_attack(enemy)
+            elif answer.lower() == "y":
+                player_defend(enemy)
+            elif answer.lower() == "z":
+                show_stats(enemy)
+        else:
+            pass
 
 def enemy_turn():
     pass
 
-def fight():
-    pass
+def fight(enemy):
+
+    show_stats(enemy)
+    
+    player_turn(enemy)
+    enemy_turn()
 
 ###########################
+
+def game_over():
+    pass
 
 # main
 def main():
@@ -313,16 +373,11 @@ def main():
 
     first_room(player)
 
-    # Main game LOOP
-    # Skapa fiende
-    # Fight-loop:
-        # Player turn
-        # Enemy turn
-    # Choose boon
-    # LVL UP +1
+    # Main game loop lol
+    lvl = 1
     while True:
-        spawn_enemy()
-        fight()
+        enemy = spawn_enemy(lvl)
+        fight(enemy)
         choose_boon()
         lvl += 1
 
