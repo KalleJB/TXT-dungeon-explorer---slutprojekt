@@ -140,7 +140,9 @@ class Enemy:
         self.id = id 
 
         self.stun = False
+        self.stun_counter = 0
         self.bleeding = False
+        self.bleeding_counter = 0
 
     def attack(target):
         pass
@@ -380,11 +382,124 @@ def show_stats(player, enemy):
             elif answer.lower() == "z":
                 os.system("cls")
                 return        
-        
-def player_attack(player, enemy):
-    print(enemy.health)
-    input("")
+###########################
+def flamboyent_fling(player, enemy):
+    # Kollar om slaget träffar med player.hit_chance
+    os.system("cls")
+    hit_chance = player.hit_chance // 5
+    if hit_chance < 1:
+        hit_chance = 1
+    if random.randint(1, 100) <= hit_chance:
+        # hit
+        damage = player.power
+        damage += damage * 2
+        enemy.health -= damage
+        print(f"Your flamboyant fling hits for {damage} damage!")
+        print(f"Enemy health  :  {enemy.health}/{enemy.max_health}")
+        pass
+    else:
+        # not hit
+        print(f"Your strike misses and the enemy laughs.")
+        print(f"Enemy health  :  {enemy.health}/{enemy.max_health}")
+    
+    print("\n\nType anything to continue.")
+    input("> ")
+    os.system("cls")
+    return
 
+def sneaky_stabb(player, enemy):
+    # Kollar om slaget träffar med player.hit_chance
+    os.system("cls")
+    if random.randint(1, 100) <= player.hit_chance + 20:
+        # hit
+        damage = player.power
+        if random.randint(1, 100) <= player.crit_chance:
+            damage += damage
+        damage = damage - enemy.defence
+        if damage < 1:
+            damage = 1
+        enemy.health -= damage
+        if random.randint(1, 100) <= player.stun_chance:
+            enemy.stun = True
+            enemy.stun_counter = 1
+        if enemy.stun_counter == 1:
+            print(f"Your strike hits for {damage} damage and stuns the enemy!")
+        print(f"Your strike hits for {damage} damage!")
+        pass
+    else:
+        # not hit
+        print(f"Your strike misses and the enemy laughs.")
+    print(f"Enemy health  :  {enemy.health}/{enemy.max_health}")
+
+    print("\n\nType anything to continue.")
+    input("> ")
+    os.system("cls")
+    return
+
+def heavy_headbutt(player, enemy):
+    # Kollar om slaget träffar med player.hit_chance
+    os.system("cls")
+    if random.randint(1, 100) <= player.hit_chance:
+        # hit
+        damage = player.power // 2
+        if random.randint(1, 100) <= player.crit_chance:
+            damage += damage
+            enemy.stun = True
+            enemy.stun_counter = 1
+        damage = damage - enemy.defence
+        if damage < 1:
+            damage = 1
+        enemy.health -= damage
+        if random.randint(1, 100) <= player.stun_chance:
+            enemy.stun = True
+            enemy.stun_counter = 1
+        if enemy.stun_counter == 1:
+            print(f"Your headbutt hits for {damage} damage and stuns the enemy!")
+        else:
+            print(f"Your headbutt hits for {damage} damage!")
+        pass
+    else:
+        # not hit
+        print(f"Your headbutt misses and the enemy laughs.")
+
+    print(f"Enemy health  :  {enemy.health}/{enemy.max_health}")
+    print("\n\nType anything to continue.")
+    input("> ")
+    os.system("cls")
+    return
+
+def player_attack(player, enemy, confirmed_answer):
+    while True:
+        os.system("cls")
+        print("This is your moveset:")
+        print("___________________ \n")
+        print("[x] Flamboyent fling")
+        print("[y] Sneaky stabb")
+        print("[c] Heavy headbutt")
+        print("[z] Go back")
+        print("___________________")
+        aceptable_answers = ["x", "y", "c", "z"]
+        answer = input("> ")
+
+        if answer in aceptable_answers:
+            if answer.lower() == "x":
+                flamboyent_fling(player, enemy)
+            elif answer.lower() == "y":
+                sneaky_stabb(player, enemy)
+            elif answer.lower() == "c":
+                heavy_headbutt(player, enemy)
+            elif answer.lower() == "z":
+                os.system("cls")
+                return
+            if confirmed_answer == True:
+                return confirmed_answer
+        else:
+            pass
+
+        if enemy.health <= 0:
+            print(f"{enemy.name} has been slain, granting you {enemy.point_gain} points.")
+            enemy_slain = True
+##########################
 def player_defend(player, enemy):
     pass
 
@@ -401,24 +516,34 @@ def player_turn(player, enemy):
         aceptable_answers = ["x", "y", "z"]
         answer = input("> ")
 
-
+        confirmed_answer = False
         if answer in aceptable_answers:
             if answer.lower() == "x":
-                player_attack(player, enemy)
+                player_attack(player, enemy, confirmed_answer)
+                if confirmed_answer == True:
+                    return
             elif answer.lower() == "y":
-                player_defend(player, enemy)
+                player_defend(player, enemy, confirmed_answer)
+                if confirmed_answer == True:
+                    return
             elif answer.lower() == "z":
                 show_stats(player, enemy)
         else:
             pass
-
+###########################
 def enemy_turn():
-    pass
+
+    print("YES")
+    input(">")
 
 def fight(player, enemy):
-
+    
     player_turn(player, enemy)
+    os.system("cls")
+    if enemy.health <= 0:
+        return
     enemy_turn(player, enemy)
+    os.system("cls")
 
 ###########################
 
@@ -450,8 +575,5 @@ def main():
         fight(player, enemy)
         choose_boon()
         lvl += 1
-
-
-
 if __name__ == "__main__":
     main()
