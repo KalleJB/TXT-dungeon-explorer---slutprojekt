@@ -13,13 +13,14 @@ class Player:
         self.points = 0
         self.power = power
         self.hit_chance = hit_chance
+        self.crit_chance = 1
         self.parry_chance = parry_chance
         self.taunt_chance = taunt_chance
         
         self.stun = False
         self.stun_chance = 0
-        self.bleed = False
-        self.bleed_counter = 0
+        self.bleeding = False
+        self.bleeding_counter = 0
 
         self.max_health = health
         self.health = health
@@ -34,14 +35,14 @@ class Player:
     def defend(self, target):
         pass
 
-    def bleed_counter_up(self):
-        self.bleed_counter += 1
-        if self.bleed_counter == 3:
-            self.bleed = False
-            self.bleed_counter = 0
+    def bleeding_counter_up(self):
+        self.bleeding_counter += 1
+        if self.bleeding_counter == 3:
+            self.bleeding = False
+            self.bleeding_counter = 0
 
-    def remove_bleed(self):
-        self.bleed = False
+    def remove_bleeding(self):
+        self.bleeding = False
     
     def modify_boon(self, boon):
         # boon är en gåva
@@ -75,19 +76,19 @@ class Room:
         pass
 
 class Weapon(Item):
-    def __init__(self, name, id, stackable, damage, crit_chance, special, stun_chance, bleedChance) -> None:
+    def __init__(self, name, id, stackable, damage, crit_chance, special, stun_chance, bleedingChance) -> None:
         super().__init__(name, id, stackable)
         self.damage = damage
         self.crit_chance = crit_chance
         self.special = special
         self.stun_chance = stun_chance 
-        self.bleedChance = bleedChance
+        self.bleedingChance = bleedingChance
 
     def attack(target):
         pass
 
-    def add_bleed(self, opponent):
-        opponent.bleed = True
+    def add_bleeding(self, opponent):
+        opponent.bleeding = True
 
 class Sheild(Weapon):
     def __init__(self, name, id, stackable, damage, crit_chance, special, size, defence) -> None:
@@ -137,6 +138,9 @@ class Enemy:
         self.defence = defence
         self.variant = variant
         self.id = id 
+
+        self.stun = False
+        self.bleeding = False
 
     def attack(target):
         pass
@@ -245,7 +249,7 @@ def points():
     pass
 
 def choose_boon(player : Player):
-    boons = [Boon("Shalyas gift", "health", 3), 
+    boons = [Boon("Shalyas gift", "max_health", 3), 
                 Boon("Grungi's Might", "power", 3), 
                 Boon("Valayas decadence", "stun_chance", 5),
                 Boon("Ymirs blessing", "power", 7),
@@ -288,35 +292,103 @@ def choose_boon(player : Player):
     return
 
 ###########################
-def show_stats(enemy):
+def show_player_stats(player):
+    while True:
+        os.system("cls")
+        print(f"{player.name}'s stats:")
+        print(f"__________________________ \n") 
+        print(f"Points       :  {player.points}") 
+        print(f"Power        :  {player.power}") 
+        print(f"Health       :  {player.health} / {player.max_health}") 
+        print(f"Defence      :  {player.defence}")
+        print(f"__________________________ \n") 
+        print(f"Hit-chance   :  {player.hit_chance}")
+        print(f"Crit-chance  :  {player.crit_chance}")
+        print(f"Parry-chance :  {player.parry_chance}")
+        print(f"Taunt-chance :  {player.taunt_chance}")
+        print(f"Stun-chance  :  {player.stun_chance}")
+        print(f"__________________________ \n")
+        print("Status effects:")
+        if player.stun == True:
+            print(f"Stuned       :  Yes")
+        else:
+            print(f"Stuned       :  No")
+        if player.bleeding == True:
+            print(f"bleeding     :  Yes")
+            print(f"bleeding-counter :  {player.bleeding_counter}")
+        else:
+            print(f"bleeding     :  No")
 
-    # print enemy and player stats  
-    os.system("cls")
-    print("___________________ \n")
-    print("[x] See MY stats")
-    print("[y] See ENEMY stats")
-    print("[z] Go back")
-    print("___________________")
-    aceptable_answers = ["x", "y", "z"]
-    answer = input("> ")
+        print("\n[z] Go back")
+        go_back = input("> ")
+        if go_back.lower() == "z":
+            os.system("cls")
+            return
 
+def show_enemy_stats(enemy):
+    while True:
+        os.system("cls")
+        print(f"{enemy.name}'s stats:")
+        print(f"__________________________ \n") 
+        print(f"Point-gain   :  {enemy.point_gain}")
+        print(f"Power        :  {enemy.power}") 
+        print(f"Health       :  {enemy.health} / {enemy.max_health}") 
+        print(f"Defence      :  {enemy.defence}")
+        print(f"Variant      :  {enemy.variant}")
+        print(f"__________________________ \n") 
+        print(f"Hit-chance   :  {enemy.hit_chance}")
+        print(f"Crit-chance   :  {enemy.crit_chance}")
+        #print(f"Parry-chance :  {enemy.parry_chance}")
+        #print(f"Taunt-chance :  {enemy.taunt_chance}")
+        #print(f"Stun-chance  :  {enemy.stun_chance}")
+        print(f"__________________________ \n")
+        print("Status effects:")
+        if enemy.stun == True:
+            print(f"Stuned       :  Yes")
+        else:
+            print(f"Stuned       :  No")
+        if enemy.bleeding == True:
+            print(f"bleeding     :  Yes")
+            print(f"bleeding-counter :  {enemy.bleeding_counter}")
+        else:
+            print(f"bleeding     :  No")
 
-    if answer in aceptable_answers:
-        if answer.lower() == "x":
-            pass
-        elif answer.lower() == "y":
-            pass
-        elif answer.lower() == "z":
-            return  
+        print("\n[z] Go back")
+        go_back = input("> ")
+        if go_back.lower() == "z":
+            os.system("cls")
+            return
 
-def player_attack(enemy):
+def show_stats(player, enemy):
+    while True:
+    # print enemy or player stats  
+        os.system("cls")
+        print("___________________ \n")
+        print("[x] See MY stats")
+        print("[y] See ENEMY stats")
+        print("[z] Go back")
+        print("___________________")
+        aceptable_answers = ["x", "y", "z"]
+        answer = input("> ")
+
+        if answer in aceptable_answers:
+            os.system("cls")
+            if answer.lower() == "x":
+                show_player_stats(player)
+            elif answer.lower() == "y":
+                show_enemy_stats(enemy)
+            elif answer.lower() == "z":
+                os.system("cls")
+                return        
+        
+def player_attack(player, enemy):
     print(enemy.health)
     input("")
 
-def player_defend(enemy):
+def player_defend(player, enemy):
     pass
 
-def player_turn(enemy):
+def player_turn(player, enemy):
     while True:
         os.system("cls")
         print(f"You're up against {enemy.name}, a {enemy.variant} enemy.")
@@ -332,23 +404,21 @@ def player_turn(enemy):
 
         if answer in aceptable_answers:
             if answer.lower() == "x":
-                player_attack(enemy)
+                player_attack(player, enemy)
             elif answer.lower() == "y":
-                player_defend(enemy)
+                player_defend(player, enemy)
             elif answer.lower() == "z":
-                show_stats(enemy)
+                show_stats(player, enemy)
         else:
             pass
 
 def enemy_turn():
     pass
 
-def fight(enemy):
+def fight(player, enemy):
 
-    show_stats(enemy)
-    
-    player_turn(enemy)
-    enemy_turn()
+    player_turn(player, enemy)
+    enemy_turn(player, enemy)
 
 ###########################
 
@@ -377,7 +447,7 @@ def main():
     lvl = 1
     while True:
         enemy = spawn_enemy(lvl)
-        fight(enemy)
+        fight(player, enemy)
         choose_boon()
         lvl += 1
 
