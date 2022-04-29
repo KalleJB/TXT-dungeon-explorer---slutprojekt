@@ -29,12 +29,6 @@ class Player:
     def add_points(self, amount):
         self.points += amount
 
-    def attack(self, target):
-        pass
-
-    def defend(self, target):
-        pass
-
     def bleeding_counter_up(self):
         self.bleeding_counter += 1
         if self.bleeding_counter == 3:
@@ -144,15 +138,11 @@ class Enemy:
         self.bleeding = False
         self.bleeding_counter = 0
 
-    def attack(target):
-        pass
-
-    def defend(target):
-        pass
-
+    def heal(self, amount):
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
 # functions
-
-
 def start_game():
     print("############################")
     print('# Welcome to Dont Wake Up! #')
@@ -246,9 +236,6 @@ def spawn_enemy(lvl):
     elif 95 < dice_roll <= 100:
         return spawn_legendary(lvl, name)
 ###########################
-
-def points():
-    pass
 
 def choose_boon(player : Player):
     boons = [Boon("Shalyas gift", "max_health", 3), 
@@ -491,19 +478,21 @@ def player_attack(player, enemy, confirmed_answer):
             elif answer.lower() == "z":
                 os.system("cls")
                 return
-            if confirmed_answer == True:
-                return confirmed_answer
+            if enemy.health <= 0:
+                print(f"{enemy.name} has been slain, granting you {enemy.point_gain} points.\n\n")
+                print("Type anything to continue.")
+                input("> ")
+
+            confirmed_answer = True
+            return confirmed_answer
         else:
             pass
-
-        if enemy.health <= 0:
-            print(f"{enemy.name} has been slain, granting you {enemy.point_gain} points.")
-            enemy_slain = True
+       
 ##########################
 def player_defend(player, enemy):
     pass
 
-def player_turn(player, enemy):
+def player_turn(player, enemy, confirmed_answer):
     while True:
         os.system("cls")
         print(f"You're up against {enemy.name}, a {enemy.variant} enemy.")
@@ -516,34 +505,89 @@ def player_turn(player, enemy):
         aceptable_answers = ["x", "y", "z"]
         answer = input("> ")
 
-        confirmed_answer = False
         if answer in aceptable_answers:
             if answer.lower() == "x":
-                player_attack(player, enemy, confirmed_answer)
-                if confirmed_answer == True:
-                    return
+                if player_attack(player, enemy, confirmed_answer) == True:
+                    return confirmed_answer
             elif answer.lower() == "y":
-                player_defend(player, enemy, confirmed_answer)
-                if confirmed_answer == True:
-                    return
-            elif answer.lower() == "z":
+                if player_defend(player, enemy, confirmed_answer) == True:
+                    return confirmed_answer
+            
+            if answer.lower() == "z":
                 show_stats(player, enemy)
         else:
             pass
-###########################
-def enemy_turn():
 
-    print("YES")
-    input(">")
+        
+###########################
+def enemy_turn(player, enemy):
+
+    special_chance = 25 
+
+    if random.randint(1, 100) <= enemy.hit_chance:
+        # Specialattack
+        if random.randint(1, 100) <= special_chance:
+            if enemy.variant == "common":
+                if random.randint(1, 100) <= 80:
+                    enemy.heal(5)
+                    print(f"{enemy.name} preformed a special move, healing 5 hp.")
+                else:
+                    enemy.defence += 1
+                    enemy.heal(2)
+                    print(f"{enemy.name} preformed a special move, healing 2 hp and gaining 1 defence.")
+
+            elif enemy.variant == "strange":
+                if random.randint(1, 100) <= 50:
+                    damage = enemy.health // 2
+                    damage -= player.defence
+                    player.health -= damage
+                    print(f"{enemy.name} preformed a special attack, dealing half of its current health as damage to you.")
+                    print(f"You suffer {damage} damage.")
+                else:
+                    damage = player.health // 2
+                    player.health -= damage
+                    print(f"{enemy.name} preformed a special attack, cutting your current health in half.")
+                    print(f"You suffer {damage} damage.")
+
+            elif enemy.variant == "legendary":
+                if random.randint(1, 100) <= 60:
+                    #player.stun = True
+                    #player.bleeding = True
+                    player.defence -= 1
+                    player.power -= 1
+                    player.max_health -= 1
+                    print(f"{enemy.name} preformed a legendary attack, permanently weakening you.")
+                    print(f"You suffer -1 power, -1 max health, -1 defence.")
+                    
+                else:
+                    damage = enemy.power
+                    player.health -= damage
+                    print(f"{enemy.name} hits you for {damage} damage, ignoring your armour.")
+
+        # Normal attack
+        else:
+            damage = enemy.power
+            if random.randint(1, 100) <= enemy.crit_chance:
+                damage = enemy.power * 2
+            damage -= player.defence
+            player.health -= damage
+            print(f"{enemy.name} hits you for {damage} damage!")
+    else:
+        print("The enemy misses, it's your time to laugh.")
+
+    print(f"Your hp  : {player.health}/{player.max_health}")
+    print("\n\nType anything to continue.")
+    input("> ")
 
 def fight(player, enemy):
-    
-    player_turn(player, enemy)
-    os.system("cls")
-    if enemy.health <= 0:
-        return
-    enemy_turn(player, enemy)
-    os.system("cls")
+    while True:
+        confirmed_answer = False
+        player_turn(player, enemy, confirmed_answer)
+        os.system("cls")
+        if enemy.health <= 0:
+            return
+        enemy_turn(player, enemy)
+        os.system("cls")
 
 ###########################
 
@@ -552,10 +596,10 @@ def game_over():
 
 # main
 def main():
-    while True:
-        playing = start_game()
-        if playing == True:
-            break
+    #while True:
+      #  playing = start_game()
+     #   if playing == True:
+    #        break
     
     # Skapa spelkaraktären och namnge den 
     player_power = 3
@@ -566,14 +610,14 @@ def main():
     taunt_chance = 50
     player = Player(choose_name(), player_power, hit_chance, parry_chance, taunt_chance, player_health, player_defence)
 
-    first_room(player)
+    #first_room(player)
 
     # Main game loop lol
     lvl = 1
     while True:
         enemy = spawn_enemy(lvl)
         fight(player, enemy)
-        choose_boon()
+        choose_boon(player)
         lvl += 1
 if __name__ == "__main__":
     main()
