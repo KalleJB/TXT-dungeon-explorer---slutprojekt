@@ -21,13 +21,16 @@ class Player:
         self.stun_chance = 0
         self.bleeding = False
         self.bleeding_counter = 0
+        self.fled = False
 
         self.max_health = health
         self.health = health
         self.defence = defence
 
-    def add_points(self, amount):
-        self.points += amount
+    def heal(self, amount):
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
 
     def bleeding_counter_up(self):
         self.bleeding_counter += 1
@@ -47,6 +50,38 @@ class Player:
         # boon.effect # ger oss vilken variabel som ska ändras
         setattr(self, boon.effect, getattr(self, boon.effect) + boon.value)
         # setattr(object, variablenamn, value)
+class Enemy:
+    def __init__(self, name, point_gain, power, hit_chance, crit_chance, health, defence, variant, id ) -> None:
+        self.name = name
+        self.point_gain = point_gain
+        self.power = power
+        self.hit_chance = hit_chance
+        self.crit_chance = crit_chance
+        self.max_health = health
+        self.health = health
+        self.defence = defence
+        self.variant = variant
+        self.id = id 
+
+        self.stun = False
+        self.stun_counter = 0
+        self.bleeding = False
+        self.bleeding_counter = 0
+
+    def heal(self, amount):
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
+
+class Boon:
+    def __init__(self, name, effect, value) -> None:
+        self.name = name # nått ballt namn på boonet, typ Shalyas Favor som ger mer health
+        self.effect = effect # sträng som innehåller variabelnamnet, t ex "self.health"
+        self.value = value # talet som ska ändra nånting hos player
+        #self.flavour_text
+    def __str__(self) -> str:
+        return f"{self.name}"
+        #flavour_text
 
 class Item:
     def __init__(self, name, id, stackable) -> None:
@@ -110,45 +145,15 @@ class Armour(Item):
     def wear():
         pass
 
-class Boon:
-    def __init__(self, name, effect, value) -> None:
-        self.name = name # nått ballt namn på boonet, typ Shalyas Favor som ger mer health
-        self.effect = effect # sträng som innehåller variabelnamnet, t ex "self.health"
-        self.value = value # talet som ska ändra nånting hos player
-        #self.flavour_text
-    def __str__(self) -> str:
-        return f"{self.name}"
-        #flavour_text
-
-class Enemy:
-    def __init__(self, name, point_gain, power, hit_chance, crit_chance, health, defence, variant, id ) -> None:
-        self.name = name
-        self.point_gain = point_gain
-        self.power = power
-        self.hit_chance = hit_chance
-        self.crit_chance = crit_chance
-        self.max_health = health
-        self.health = health
-        self.defence = defence
-        self.variant = variant
-        self.id = id 
-
-        self.stun = False
-        self.stun_counter = 0
-        self.bleeding = False
-        self.bleeding_counter = 0
-
-    def heal(self, amount):
-        self.health += amount
-        if self.health > self.max_health:
-            self.health = self.max_health
 # functions
+
 def start_game():
-    print("############################")
-    print('# Welcome to Dont Wake Up! #')
-    print("############################")
-    print('- Confirm your commands by typing the letter in the [box].')
-    print('- [x] Wake up')
+    print("###################################")
+    print('# Welcome to Flamboyant Fighting! #')
+    print("###################################")
+    print('- Confirm your commands by typing the thing in the [box].')
+    print('- If there is no box, do anything.')
+    print('- [x] Kick ass')
 
     start = input('> ')
     if start.lower() == "x":
@@ -158,18 +163,25 @@ def start_game():
         os.system('clear')
 
 def choose_name():
-    print("You open you eyes but don't see a thing, feeling as if they've been glued shut.\nWhile trying to remeber why you're here, you realize you dont even know your name...")
-    print("\nWhats your name?")
+    print("Hi cutie wanna tell me your name?\n")
     name = input('> ')
 
     os.system('cls')
     print(f'{name}... That feels familiar.')
+    print("My name doesnt matter, but im here to inform you that you're next up.")
+    input("> ")
+    os.system('cls')
+    print("What? You cant remember why you are here?")
+    input("> ")
+    os.system('cls')
+    print("HAHAHA how adorable, of course you cant, no one can.")
+    print("Just do what makes sense to you, and make sure to make it fruity.")
+    input("> ")
+    os.system('cls')
     return name
 
 def first_room(player):
-    print("Regaining some of your vision lets you see the walls of the room containing you. \nThey're made of damp cobblestone rock you've never seen before. \nFinding our why you are here is starting to get urgent.")
-    print("\nYou find a small wooden door on one of the walls.")
-    print("Before you have time take your first step, a voice in your head tells you to imagine a gift.")
+    print("But before we start, why dont you close your eyes and imagine some nice things.")
 
     choose_boon(player)
     os.system("cls")
@@ -238,18 +250,18 @@ def spawn_enemy(lvl):
 ###########################
 
 def choose_boon(player : Player):
-    boons = [Boon("Shalyas gift", "max_health", 3), 
-                Boon("Grungi's Might", "power", 3), 
-                Boon("Valayas decadence", "stun_chance", 5),
-                Boon("Ymirs blessing", "power", 7),
-                Boon("Draculas might", "health", -2)]
+    boons = [Boon("Purple thong", "max_health", 3), 
+                Boon("Acrylic nails", "power", 3), 
+                Boon("Audacity", "stun_chance", 5),
+                Boon("High heels", "power", 7),
+                Boon("Bubble tea", "health", -2)]
 
     avaliable_boons = []
     for i in range(3):
         avaliable_boons.append(boons[random.randint(0, len(boons) - 1)])
 
     print("Closing your eyes, your vision suddenly becomes more vivid.")
-    print("You imagine a some gifts.")
+    print("You imagine a some nice stuff.")
     i = 1
     print("______________________ \n")
     for i, boon in enumerate(avaliable_boons):
@@ -260,7 +272,8 @@ def choose_boon(player : Player):
 
     while True:
         boon_choice = int(input("> "))
-        if 0 <= boon_choice <= 2:
+        aceptable_answers = ["0", "1", "2"]
+        if boon_choice in aceptable_answers:
             picked_boon = avaliable_boons[boon_choice]
             player.modify_boon(picked_boon)
             print("\n")
@@ -270,10 +283,10 @@ def choose_boon(player : Player):
     
     os.system('cls')
     if picked_boon.value > 0:
-        print(f"As you imagine the gift in your head, you feel power surging through you.")
+        print(f"As you imagine the fruity things in your head, you feel power surging through you.")
         print(f"{picked_boon.value} {picked_boon.effect} gained.")
     else:
-        print("As you imagine the gift in your head, you feel an aching pain in your soul.")
+        print("As you imagine the fruity thing in your head, you feel an aching pain in your soul.")
         print(f"{picked_boon.value} {picked_boon.effect} lost.")
     
     print("\n\n[x]  Continue")
@@ -479,6 +492,7 @@ def player_attack(player, enemy, confirmed_answer):
                 os.system("cls")
                 return
             if enemy.health <= 0:
+                player.points += enemy.point_gain
                 print(f"{enemy.name} has been slain, granting you {enemy.point_gain} points.\n\n")
                 print("Type anything to continue.")
                 input("> ")
@@ -489,8 +503,49 @@ def player_attack(player, enemy, confirmed_answer):
             pass
        
 ##########################
-def player_defend(player, enemy):
-    pass
+def player_defend(player, enemy, confirmed_answer):
+    while True:
+        os.system("cls")
+        print("This is your defensive moveset:")
+        print("___________________ \n")
+        print("[x] Ciggarette")
+        print("[y] Fruity flight")
+        print("[z] Go back")
+        print("___________________")
+        aceptable_answers = ["x", "y", "z"]
+        answer = input("> ")
+
+        if answer in aceptable_answers:
+            os.system("cls")
+            if answer.lower() == "x":
+                heal = 2
+                player.heal(heal)
+                print(f"You enjoy a smoke and recover {heal} hp.")
+                print(f"Your hp  : {player.health}/{player.max_health}")
+            elif answer.lower() == "y":
+                if player.fled == False:
+                    player.points = player.points // 2
+                    enemy.health = 0
+                    player.fled = True
+                    print(f"You make a run in your high heels, dropping half of your points but outrunning {enemy.name}.")
+                    print(f"Current points  : {player.points}")
+                    print("This wont work twise...")
+                else:
+                    player.health = 0
+                    print("You try running away, breaking your ankles and falling flat.")
+                    input("> ")
+                    game_over()
+            elif answer.lower() == "z":
+                os.system("cls")
+                return
+
+            print("\n\n[x] Move on")
+            input("> ")
+            os.system("cls")
+            confirmed_answer = True
+            return confirmed_answer
+        else:
+            pass
 
 def player_turn(player, enemy, confirmed_answer):
     while True:
@@ -518,7 +573,6 @@ def player_turn(player, enemy, confirmed_answer):
         else:
             pass
 
-        
 ###########################
 def enemy_turn(player, enemy):
 
@@ -531,10 +585,12 @@ def enemy_turn(player, enemy):
                 if random.randint(1, 100) <= 80:
                     enemy.heal(5)
                     print(f"{enemy.name} preformed a special move, healing 5 hp.")
+                    print(f"Enemy health  : {enemy.health}/{enemy.max_health}")
                 else:
                     enemy.defence += 1
                     enemy.heal(2)
                     print(f"{enemy.name} preformed a special move, healing 2 hp and gaining 1 defence.")
+                    print(f"Enemy health  : {enemy.health}/{enemy.max_health}")
 
             elif enemy.variant == "strange":
                 if random.randint(1, 100) <= 50:
@@ -575,9 +631,12 @@ def enemy_turn(player, enemy):
     else:
         print("The enemy misses, it's your time to laugh.")
 
-    print(f"Your hp  : {player.health}/{player.max_health}")
-    print("\n\nType anything to continue.")
-    input("> ")
+    if player.health > 0:
+        print(f"Your hp  : {player.health}/{player.max_health}")
+        print("\n\nType anything to continue.")
+        input("> ")
+    else:
+        game_over()
 
 def fight(player, enemy):
     while True:
@@ -585,21 +644,42 @@ def fight(player, enemy):
         player_turn(player, enemy, confirmed_answer)
         os.system("cls")
         if enemy.health <= 0:
+            os.system("cls")
             return
         enemy_turn(player, enemy)
         os.system("cls")
 
 ###########################
 
-def game_over():
-    pass
+def game_over(player : Player):
+    while True:
+        os.system("cls")
+        if player.points == 0:
+            print("You died a faliure.")
+        elif player.points > 10:
+            print("You died kind of a faliure.")
+        elif player.points > 50:
+            print("You died.")
+        elif player.points > 100:
+            print("You died you fabulouus bastard.")
+        print(f"This was your score  : {player.points}\n\n")
+        print("Go again?")
+        print("[x] Yes")
+        print("[z] No")
+        player_input = input("> ")
+        if player_input.lower() == "x":
+            main()
+        elif player_input.lower() == "z":
+            quit()
+        else:
+            pass
 
 # main
 def main():
-    #while True:
-      #  playing = start_game()
-     #   if playing == True:
-    #        break
+    while True:
+        playing = start_game()
+        if playing == True:
+            break
     
     # Skapa spelkaraktären och namnge den 
     player_power = 3
@@ -618,6 +698,8 @@ def main():
         enemy = spawn_enemy(lvl)
         fight(player, enemy)
         choose_boon(player)
+        if player.health <=0:
+            game_over()
         lvl += 1
 if __name__ == "__main__":
     main()
