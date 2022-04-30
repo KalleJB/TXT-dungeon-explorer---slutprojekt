@@ -64,7 +64,6 @@ class Enemy:
         self.id = id 
 
         self.stun = False
-        self.stun_counter = 0
         self.bleeding = False
         self.bleeding_counter = 0
 
@@ -148,6 +147,7 @@ class Armour(Item):
 # functions
 
 def start_game():
+    os.system("cls")
     print("###################################")
     print('# Welcome to Flamboyant Fighting! #')
     print("###################################")
@@ -185,6 +185,7 @@ def first_room(player):
 
     choose_boon(player)
     os.system("cls")
+    print("Walking trough a damp pinkish hallway you see a door laced with leather. \nYou dont feel to good about it.")
     print("[x] Open door")
     door = input("> ")
     if door.lower() == "x":
@@ -253,15 +254,21 @@ def choose_boon(player : Player):
     boons = [Boon("Purple thong", "max_health", 3), 
                 Boon("Acrylic nails", "power", 3), 
                 Boon("Audacity", "stun_chance", 5),
-                Boon("High heels", "power", 7),
-                Boon("Bubble tea", "health", -2)]
+                Boon("High heels", "power", 2),
+                Boon("Bubble tea", "health", -2),
+                Boon("Lash extensions", "max_health", 2),
+                Boon("Pink lipstick", "hit_chance", 5),
+                Boon("Knife", "power", 7),
+                Boon("Unidentified liquid", "health", +5),
+                Boon("Vape", "crit_chance", 5),
+                Boon("Pink thong", "points", 50)]
 
     avaliable_boons = []
     for i in range(3):
         avaliable_boons.append(boons[random.randint(0, len(boons) - 1)])
 
     print("Closing your eyes, your vision suddenly becomes more vivid.")
-    print("You imagine a some nice stuff.")
+    print("You imagine some nice stuff.")
     i = 1
     print("______________________ \n")
     for i, boon in enumerate(avaliable_boons):
@@ -270,10 +277,10 @@ def choose_boon(player : Player):
     print("______________________")
     print("Manifest a boon with their index.")
 
+    aceptable_answers = ["0", "1", "2"]
     while True:
         boon_choice = int(input("> "))
-        aceptable_answers = ["0", "1", "2"]
-        if boon_choice in aceptable_answers:
+        if str(boon_choice) in aceptable_answers:
             picked_boon = avaliable_boons[boon_choice]
             player.modify_boon(picked_boon)
             print("\n")
@@ -421,8 +428,7 @@ def sneaky_stabb(player, enemy):
         enemy.health -= damage
         if random.randint(1, 100) <= player.stun_chance:
             enemy.stun = True
-            enemy.stun_counter = 1
-        if enemy.stun_counter == 1:
+        if enemy.stun == True:
             print(f"Your strike hits for {damage} damage and stuns the enemy!")
         print(f"Your strike hits for {damage} damage!")
         pass
@@ -445,15 +451,13 @@ def heavy_headbutt(player, enemy):
         if random.randint(1, 100) <= player.crit_chance:
             damage += damage
             enemy.stun = True
-            enemy.stun_counter = 1
         damage = damage - enemy.defence
         if damage < 1:
             damage = 1
         enemy.health -= damage
         if random.randint(1, 100) <= player.stun_chance:
             enemy.stun = True
-            enemy.stun_counter = 1
-        if enemy.stun_counter == 1:
+        if enemy.stun == True:
             print(f"Your headbutt hits for {damage} damage and stuns the enemy!")
         else:
             print(f"Your headbutt hits for {damage} damage!")
@@ -534,7 +538,7 @@ def player_defend(player, enemy, confirmed_answer):
                     player.health = 0
                     print("You try running away, breaking your ankles and falling flat.")
                     input("> ")
-                    game_over()
+                    game_over(player)
             elif answer.lower() == "z":
                 os.system("cls")
                 return
@@ -578,65 +582,71 @@ def enemy_turn(player, enemy):
 
     special_chance = 25 
 
-    if random.randint(1, 100) <= enemy.hit_chance:
-        # Specialattack
-        if random.randint(1, 100) <= special_chance:
-            if enemy.variant == "common":
-                if random.randint(1, 100) <= 80:
-                    enemy.heal(5)
-                    print(f"{enemy.name} preformed a special move, healing 5 hp.")
-                    print(f"Enemy health  : {enemy.health}/{enemy.max_health}")
-                else:
-                    enemy.defence += 1
-                    enemy.heal(2)
-                    print(f"{enemy.name} preformed a special move, healing 2 hp and gaining 1 defence.")
-                    print(f"Enemy health  : {enemy.health}/{enemy.max_health}")
+    if enemy.stun == False:
+        if random.randint(1, 100) <= enemy.hit_chance:
+            # Specialattack
+            if random.randint(1, 100) <= special_chance:
+                if enemy.variant == "common":
+                    if random.randint(1, 100) <= 80:
+                        enemy.heal(5)
+                        print(f"{enemy.name} preformed a special move, healing 5 hp.")
+                        print(f"Enemy health  : {enemy.health}/{enemy.max_health}")
+                    else:
+                        enemy.defence += 1
+                        enemy.heal(2)
+                        print(f"{enemy.name} preformed a special move, healing 2 hp and gaining 1 defence.")
+                        print(f"Enemy health  : {enemy.health}/{enemy.max_health}")
 
-            elif enemy.variant == "strange":
-                if random.randint(1, 100) <= 50:
-                    damage = enemy.health // 2
-                    damage -= player.defence
-                    player.health -= damage
-                    print(f"{enemy.name} preformed a special attack, dealing half of its current health as damage to you.")
-                    print(f"You suffer {damage} damage.")
-                else:
-                    damage = player.health // 2
-                    player.health -= damage
-                    print(f"{enemy.name} preformed a special attack, cutting your current health in half.")
-                    print(f"You suffer {damage} damage.")
+                elif enemy.variant == "strange":
+                    if random.randint(1, 100) <= 50:
+                        damage = enemy.health // 2
+                        damage -= player.defence
+                        player.health -= damage
+                        print(f"{enemy.name} preformed a special attack, dealing half of its current health as damage to you.")
+                        print(f"You suffer {damage} damage.")
+                    else:
+                        damage = player.health // 2
+                        player.health -= damage
+                        print(f"{enemy.name} preformed a special attack, cutting your current health in half.")
+                        print(f"You suffer {damage} damage.")
 
-            elif enemy.variant == "legendary":
-                if random.randint(1, 100) <= 60:
-                    #player.stun = True
-                    #player.bleeding = True
-                    player.defence -= 1
-                    player.power -= 1
-                    player.max_health -= 1
-                    print(f"{enemy.name} preformed a legendary attack, permanently weakening you.")
-                    print(f"You suffer -1 power, -1 max health, -1 defence.")
-                    
-                else:
-                    damage = enemy.power
-                    player.health -= damage
-                    print(f"{enemy.name} hits you for {damage} damage, ignoring your armour.")
+                elif enemy.variant == "legendary":
+                    if random.randint(1, 100) <= 60:
+                        #player.stun = True
+                        #player.bleeding = True
+                        player.defence -= 1
+                        player.power -= 1
+                        player.max_health -= 1
+                        print(f"{enemy.name} preformed a legendary attack, permanently weakening you.")
+                        print(f"You suffer -1 power, -1 max health, -1 defence.")
+                        
+                    else:
+                        damage = enemy.power
+                        player.health -= damage
+                        print(f"{enemy.name} hits you for {damage} damage, ignoring your armour.")
 
-        # Normal attack
+            # Normal attack
+            else:
+                damage = enemy.power
+                if random.randint(1, 100) <= enemy.crit_chance:
+                    damage = enemy.power * 2
+                damage -= player.defence
+                player.health -= damage
+                print(f"{enemy.name} hits you for {damage} damage!")
         else:
-            damage = enemy.power
-            if random.randint(1, 100) <= enemy.crit_chance:
-                damage = enemy.power * 2
-            damage -= player.defence
-            player.health -= damage
-            print(f"{enemy.name} hits you for {damage} damage!")
-    else:
-        print("The enemy misses, it's your time to laugh.")
+            print("The enemy misses, it's your time to laugh.")
 
-    if player.health > 0:
         print(f"Your hp  : {player.health}/{player.max_health}")
         print("\n\nType anything to continue.")
         input("> ")
+        if player.health <= 0:
+            game_over(player)
+               
     else:
-        game_over()
+        print("The enemy is stunned and has no interest in fighting you this round.")
+        enemy.stun = False
+        print("\n\nType anything to continue.")
+        input("> ")
 
 def fight(player, enemy):
     while True:
@@ -670,6 +680,7 @@ def game_over(player : Player):
         if player_input.lower() == "x":
             main()
         elif player_input.lower() == "z":
+            os.system("cls")
             quit()
         else:
             pass
@@ -683,14 +694,14 @@ def main():
     
     # Skapa spelkaraktären och namnge den 
     player_power = 3
-    player_health = 10
+    player_health = 1
     player_defence = 1
-    hit_chance = 60
+    hit_chance = 70
     parry_chance = 50
     taunt_chance = 50
     player = Player(choose_name(), player_power, hit_chance, parry_chance, taunt_chance, player_health, player_defence)
 
-    #first_room(player)
+    first_room(player)
 
     # Main game loop lol
     lvl = 1
@@ -699,7 +710,7 @@ def main():
         fight(player, enemy)
         choose_boon(player)
         if player.health <=0:
-            game_over()
+            game_over(player)
         lvl += 1
 if __name__ == "__main__":
     main()
